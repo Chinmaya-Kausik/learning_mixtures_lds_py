@@ -31,14 +31,14 @@ def motion_sense_preprocessing():
     M=12
 
     # Initialize a numpy array containing 24 400 times 12 matrices 
-    # Shape (24, 200, 12)
-    combined_data = np.zeros([2*M,T,d])
+    # Shape (24, 12, 400)
+    combined_data = np.zeros([2*M,d,T])
 
     # Take blocks from jog_rows and walk_rows to add to the combined data
     for i in range(M):
-        combined_data[i, :, :] = jog_rows[400*i:400*(i+1), :]
+        combined_data[i, :, :] = jog_rows[:,400*i:400*(i+1)]
     for i in range(M):
-        combined_data[(M+i), :, :] = walk_rows[400*i:400*(i+1), :]
+        combined_data[(M+i), :, :] = walk_rows[:,400*i:400*(i+1)]
         
-    return combined_data.transpose(0,2,1)
+    return combined_data
 
