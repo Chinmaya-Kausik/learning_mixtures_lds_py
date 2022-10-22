@@ -34,7 +34,7 @@ def motion_sense_preprocessing():
     # Shape (24, 12, 400)
     combined_data = np.zeros([2*M,d,T])
 
-    # Take blocks from jog_rows and walk_rows to add to the combined data
+    # Take blocks of 400 timesteps from jog_rows and walk_rows to add to the combined data
     for i in range(M):
         combined_data[i, :, :] = np.array(jog_rows[400*i:400*(i+1),:]).transpose()
     for i in range(M):
