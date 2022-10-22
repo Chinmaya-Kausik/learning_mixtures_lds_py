@@ -36,9 +36,9 @@ def motion_sense_preprocessing():
 
     # Take blocks from jog_rows and walk_rows to add to the combined data
     for i in range(M):
-        combined_data[i, :, :] = jog_rows[:,400*i:400*(i+1)]
+        combined_data[i, :, :] = np.array(jog_rows[400*i:400*(i+1),:]).transpose()
     for i in range(M):
-        combined_data[(M+i), :, :] = walk_rows[:,400*i:400*(i+1)]
+        combined_data[(M+i), :, :] = np.array(jog_rows[400*i:400*(i+1),:]).transpose()
         
     return combined_data
 
