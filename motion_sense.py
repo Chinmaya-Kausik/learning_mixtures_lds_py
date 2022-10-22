@@ -30,7 +30,7 @@ def motion_sense_preprocessing():
     T = 400
     M=12
 
-    # Initialize a numpy array containing 24 400 times 12 matrices 
+    # Initialize a numpy array containing 24 (12 x 400) matrices 
     # Shape (24, 12, 400)
     combined_data = np.zeros([2*M,d,T])
 
