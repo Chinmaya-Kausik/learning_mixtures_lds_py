@@ -22,6 +22,7 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     Returns:
         labels: predicted labels of shape (M,1)
     """
+    d = Vs.shape[0]
     M = len(data)
     T = data[0].shape[1] - 1
     N = int(np.floor(T/4))
@@ -62,8 +63,8 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
         S_original += np.sum((t1G_repeat-t1G_repeat.transpose(3,1,2,0))*(t2G_repeat-t2G_repeat.transpose(3,1,2,0)), axis = (1,2))
         S_original += np.sum((t1Y_repeat-t1Y_repeat.transpose(3,1,2,0))*(t2Y_repeat-t2Y_repeat.transpose(3,1,2,0)), axis = (1,2))
     else: #With dimension reduction
-        Vs_repeat = np.identity(d)[np.newaxis,:,:,np.newaxis].repeat(M,axis=0).repeat(K,axis=3) #Vs_repeat.shape = (M,d,d,K)
-        Us_repeat = np.identity(d)[np.newaxis,:,:,np.newaxis].repeat(M,axis=0).repeat(K,axis=3) #Vs_repeat.shape = (M,d,d,K)    
+        Vs_repeat = Vs[:,:,np.newaxis].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)
+        Us_repeat = Us[:,:,np.newaxis].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)    
         t1G_repeat = np.repeat(tmp1_Gammas[:,:,:,np.newaxis],K,axis=3) #t1G_repeat.shape = (M,d,d,K)
         t2G_repeat = np.repeat(tmp2_Gammas[:,:,:,np.newaxis],K,axis=3)#t2G_repeat.shape = (M,d,d,K)
         t1Y_repeat = np.repeat(tmp1_Ys[:,:,:,np.newaxis],K,axis=3) #t1Y_repeat.shape = (M,d,d,K)
@@ -85,8 +86,6 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
         return 0 if x > tau else 1
     
     S = np.vectorize(less_than_tau)(S_original)
-    
-    
     
     # Vectorize the following code
     # for m1 in range(M):
@@ -127,7 +126,7 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     return clustering.labels_.reshape(-1,1)
 
     # # Manual KMeans
-    # # Caution: Need to select the K-largest MAGNITUDE eigenvlaues instead of just K-largest
+    # # Caution: Unclear if this code is working
     # eig_vals, eig_vecs = linalg.eigh(S)
     # K_largest_mag_idx = sorted(range(M-1), key = lambda idx: -abs(eig_vals[idx]))[:K]
     # U = eig_vecs[:,K_largest_mag_idx]
@@ -152,7 +151,7 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     # return labels
 
 # Initial setup 
-Ntrial = 5 
+Ntrial = 10 
 d = 40
 K =  2
 rho = 0.5
@@ -187,7 +186,6 @@ tau = delta_gy/4
 for k_T in range(len(Tclusterings)):
     Tclustering = Tclusterings[k_T]
     for k_trial in range(Ntrial): 
-        print("Tclustering:", Tclustering, "  k_trial:", k_trial)
         # Generate a mixed LDS
         true_labels = np.random.randint(K,size=[Mclustering,1])
         Ts = np.ones([Mclustering,1])*Tclustering
@@ -197,7 +195,9 @@ for k_T in range(len(Tclusterings)):
         Vs, Us = subspace_estimation(data,K)
         
         #0/1 clustering with/without dim reduction
+        print("Tclustering:", Tclustering, ",  k_trial:", k_trial, ", No subspace")
         labels_without = clustering_fast(data,Vs,Us, K, tau, no_subspace=1)
+        print("Tclustering:", Tclustering, "  k_trial:", k_trial, "With subspace")
         labels_with =  clustering_fast(data,Vs,Us, K, tau, no_subspace=0)
         
         #Note: We are taking the minimum of these two quantities as the predicted labels might be flipped 
