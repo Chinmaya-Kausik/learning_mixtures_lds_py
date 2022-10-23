@@ -72,8 +72,9 @@ ax.set(xlabel = "Time step", ylabel = "Measurement", title = "Mode 2: walking")
 fig.savefig("walk_fig.png")
 plt.close()
 
+# Color map of the original matrix
 Vs, Us = subspace_estimation(combined_data,K)
-tau = 140
+tau = 110
 labels, S_original, S = clustering_fast(combined_data, Vs, Us, K, tau, 0)
 fig, ax = plt.subplots()
 ax.set(xlabel = "Trajectories", ylabel = "Trajectories", title = "Color map of the original matrix")
@@ -81,4 +82,22 @@ cax = ax.matshow(S_original, cmap = "gray")
 ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
 fig.colorbar(cax, ax=ax)
 fig.savefig("gray_color_map.png")
-plt.show()
+plt.close()
+
+# Histogram of computed distances 
+newdata = S_original.reshape(576)
+fig, ax = plt.subplots()
+ax.hist(newdata, bins = 40)
+ax.set(xlabel = "Computed distance", ylabel= "Frequency", title="Histogram of computed distances")
+fig.savefig("hist_computed_dists.png")
+plt.close()
+# Suggests tau = 110
+
+# Color map of the true S
+fig, ax = plt.subplots()
+ax.set(xlabel = "Trajectories", ylabel = "Trajectories", title = "Color map of the thresholded matrix")
+cax = ax.matshow(S, cmap = "gray")
+ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
+fig.colorbar(cax, ax=ax)
+fig.savefig("gray_color_map_true.png")
+plt.close()
