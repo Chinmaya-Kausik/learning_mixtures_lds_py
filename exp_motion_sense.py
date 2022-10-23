@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from subspace_est import subspace_estimation
 from clustering import clustering_fast
+from sklearn.cluster import SpectralClustering
 
 """Preprocessing"""
 
@@ -101,3 +102,9 @@ ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
 fig.colorbar(cax, ax=ax)
 fig.savefig("gray_color_map_true.png")
 plt.close()
+
+# Misclassification rate
+clustering = SpectralClustering(n_clusters=K,affinity='precomputed').fit(S)
+labels = clustering.labels_.reshape(-1,)
+true_labels = np.concatenate((np.zeros(12), np.ones(12)))
+print("The misclassification rate is", min(np.mean(abs(labels- true_labels)), np.mean(abs((1-labels) - true_labels))))
