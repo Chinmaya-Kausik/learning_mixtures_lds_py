@@ -54,27 +54,30 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     
     S_original = np.zeros([M,M])
     
-    if no_subspace == 0: #If dimension reduction is used
-        Vs_repeat = np.repeat(Vs[:,:,:,np.newaxis],M,axis=3).transpose(3,1,0,2) #Vs_repeat.shape = (M,d,d,K)
-        Us_repeat = np.repeat(Us[:,:,:,np.newaxis],M,axis=3).transpose(3,1,0,2) #Us_repeat.shape = (M,d,d,K)
-    else: #Without dimension reduction, just pick V[i],U[i] = Id
+    if no_subspace: #If dimension reduction is not used
+        t1G_repeat = tmp1_Gammas[:,:,:,np.newaxis].repeat(M,axis=3)
+        t2G_repeat = tmp2_Gammas[:,:,:,np.newaxis].repeat(M,axis=3)
+        t1Y_repeat = tmp1_Ys[:,:,:,np.newaxis].repeat(M,axis=3)
+        t2Y_repeat = tmp2_Ys[:,:,:,np.newaxis].repeat(M,axis=3)
+        S_original += np.sum((t1G_repeat-t1G_repeat.transpose(3,1,2,0))*(t2G_repeat-t2G_repeat.transpose(3,1,2,0)), axis = (1,2))
+        S_original += np.sum((t1Y_repeat-t1Y_repeat.transpose(3,1,2,0))*(t2Y_repeat-t2Y_repeat.transpose(3,1,2,0)), axis = (1,2))
+    else: #With dimension reduction
         Vs_repeat = np.identity(d)[np.newaxis,:,:,np.newaxis].repeat(M,axis=0).repeat(K,axis=3) #Vs_repeat.shape = (M,d,d,K)
-        Us_repeat = np.identity(d)[np.newaxis,:,:,np.newaxis].repeat(M,axis=0).repeat(K,axis=3) #Vs_repeat.shape = (M,d,d,K)
-        
-    t1G_repeat = np.repeat(tmp1_Gammas[:,:,:,np.newaxis],K,axis=3) #t1G_repeat.shape = (M,d,d,K)
-    t2G_repeat = np.repeat(tmp2_Gammas[:,:,:,np.newaxis],K,axis=3)#t2G_repeat.shape = (M,d,d,K)
-    t1Y_repeat = np.repeat(tmp1_Ys[:,:,:,np.newaxis],K,axis=3) #t1Y_repeat.shape = (M,d,d,K)
-    t2Y_repeat = np.repeat(tmp2_Ys[:,:,:,np.newaxis],K,axis=3)     #t1Y_repeat.shape = (M,d,d,K)   
-    V_times_t1G = np.repeat(np.sum(Vs_repeat*t1G_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t1G.shape =  (M,d,K,M)
-    V_times_t2G = np.repeat(np.sum(Vs_repeat*t2G_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t2G.shape =  (M,d,K,M)
-    U_times_t1Y = np.repeat(np.sum(Us_repeat*t1Y_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t1Y.shape =  (M,d,K,M)
-    U_times_t2Y = np.repeat(np.sum(Us_repeat*t2Y_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t2Y.shape =  (M,d,K,M)
-    V_times_t1Gdiff = V_times_t1G - V_times_t1G.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M) 
-    V_times_t2Gdiff = V_times_t2G - V_times_t2G.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
-    U_times_t1Ydiff = U_times_t1Y - U_times_t1Y.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
-    U_times_t2Ydiff = U_times_t2Y - U_times_t2Y.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
-    S_original = np.sum(V_times_t1Gdiff*V_times_t2Gdiff, axis=(1,2)) #S_original.shape = (M,M)
-    S_original += np.sum(U_times_t1Ydiff*U_times_t2Ydiff, axis=(1,2))
+        Us_repeat = np.identity(d)[np.newaxis,:,:,np.newaxis].repeat(M,axis=0).repeat(K,axis=3) #Vs_repeat.shape = (M,d,d,K)    
+        t1G_repeat = np.repeat(tmp1_Gammas[:,:,:,np.newaxis],K,axis=3) #t1G_repeat.shape = (M,d,d,K)
+        t2G_repeat = np.repeat(tmp2_Gammas[:,:,:,np.newaxis],K,axis=3)#t2G_repeat.shape = (M,d,d,K)
+        t1Y_repeat = np.repeat(tmp1_Ys[:,:,:,np.newaxis],K,axis=3) #t1Y_repeat.shape = (M,d,d,K)
+        t2Y_repeat = np.repeat(tmp2_Ys[:,:,:,np.newaxis],K,axis=3)     #t1Y_repeat.shape = (M,d,d,K)   
+        V_times_t1G = np.repeat(np.sum(Vs_repeat*t1G_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t1G.shape =  (M,d,K,M)
+        V_times_t2G = np.repeat(np.sum(Vs_repeat*t2G_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t2G.shape =  (M,d,K,M)
+        U_times_t1Y = np.repeat(np.sum(Us_repeat*t1Y_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t1Y.shape =  (M,d,K,M)
+        U_times_t2Y = np.repeat(np.sum(Us_repeat*t2Y_repeat,axis=1)[:,:,:,np.newaxis],M,axis=3) #V_times_t2Y.shape =  (M,d,K,M)
+        V_times_t1Gdiff = V_times_t1G - V_times_t1G.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M) 
+        V_times_t2Gdiff = V_times_t2G - V_times_t2G.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
+        U_times_t1Ydiff = U_times_t1Y - U_times_t1Y.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
+        U_times_t2Ydiff = U_times_t2Y - U_times_t2Y.transpose(3,1,2,0) #V_times_t1Gdiff.shape =  (M,d,K,M)
+        S_original += np.sum(V_times_t1Gdiff*V_times_t2Gdiff, axis=(1,2)) #S_original.shape = (M,M)
+        S_original += np.sum(U_times_t1Ydiff*U_times_t2Ydiff, axis=(1,2))
 
     
     # Compute the zero-one similarity matrix
@@ -119,13 +122,15 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     
     
     
-    # Cluster using k-means
-    # Sklearn - takes longer, but gives much better accuracy
+    # Spectral clustering using Sklearn 
     clustering = SpectralClustering(n_clusters=K,affinity='precomputed').fit(S)
     return clustering.labels_.reshape(-1,1)
 
-    # # KMeans - faster, seems faster
-    # _, U = linalg.eigh(S,subset_by_index = [M-K,M-1]) #U.shape = (M,K)
+    # # Manual KMeans
+    # # Caution: Need to select the K-largest MAGNITUDE eigenvlaues instead of just K-largest
+    # eig_vals, eig_vecs = linalg.eigh(S)
+    # K_largest_mag_idx = sorted(range(M-1), key = lambda idx: -abs(eig_vals[idx]))[:K]
+    # U = eig_vecs[:,K_largest_mag_idx]
     # centers = np.zeros([K,K])
     
     # for k in range(K):
@@ -146,8 +151,8 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     # labels = labels.reshape(-1,1) #shape = (M,1)
     # return labels
 
-## Initial setup 
-Ntrial = 10 
+# Initial setup 
+Ntrial = 5 
 d = 40
 K =  2
 rho = 0.5
@@ -195,7 +200,7 @@ for k_T in range(len(Tclusterings)):
         labels_without = clustering_fast(data,Vs,Us, K, tau, no_subspace=1)
         labels_with =  clustering_fast(data,Vs,Us, K, tau, no_subspace=0)
         
-        # Note: We are taking the minimum of these two quantities as the predicted labels might be flipped 
+        #Note: We are taking the minimum of these two quantities as the predicted labels might be flipped 
         mis_without = min(np.mean(abs(labels_without - true_labels)), np.mean(abs(1-labels_without - true_labels)))
         mis_with = min(np.mean(abs(labels_with - true_labels)), np.mean(abs(1-labels_with - true_labels)))
         
@@ -206,25 +211,10 @@ errors_without = np.mean(error_list_without,axis=1)
 errors_with = np.mean(error_list_with,axis=1)
 
 
-##Plot the errors
+# Plot the errors
 plt.plot(Tclusterings,errors_without, 'b--o')
 plt.plot(Tclusterings,errors_with,'r-o')
 plt.legend(["without subspace", "with subspace"])
 plt.xlabel('Tclustering')
 plt.ylabel("clustering error")
 plt.show()
-
-
-# In[ ]:
-
-
-
-
-
-# ## Appendix
-
-# In[4]:
-
-
-
-
