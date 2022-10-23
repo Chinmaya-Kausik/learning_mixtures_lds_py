@@ -80,4 +80,5 @@ ax.set(xlabel = "Trajectories", ylabel = "Trajectories", title = "Color map of t
 cax = ax.matshow(S_original, cmap = "gray")
 ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
 fig.colorbar(cax, ax=ax)
+fig.savefig("gray_color_map.png")
 plt.show()
