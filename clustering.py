@@ -63,8 +63,8 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
         S_original += np.sum((t1G_repeat-t1G_repeat.transpose(3,1,2,0))*(t2G_repeat-t2G_repeat.transpose(3,1,2,0)), axis = (1,2))
         S_original += np.sum((t1Y_repeat-t1Y_repeat.transpose(3,1,2,0))*(t2Y_repeat-t2Y_repeat.transpose(3,1,2,0)), axis = (1,2))
     else: #With dimension reduction
-        Vs_repeat = Vs[np.newaxis,:,:].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)
-        Us_repeat = Us[np.newaxis,:,:].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)    
+        Vs_repeat = Vs[np.newaxis,:,:,:].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)
+        Us_repeat = Us[np.newaxis,:,:,:].repeat(M,axis=0) #Vs_repeat.shape = (M,d,d,K)    
         t1G_repeat = np.repeat(tmp1_Gammas[:,:,:,np.newaxis],K,axis=3) #t1G_repeat.shape = (M,d,d,K)
         t2G_repeat = np.repeat(tmp2_Gammas[:,:,:,np.newaxis],K,axis=3)#t2G_repeat.shape = (M,d,d,K)
         t1Y_repeat = np.repeat(tmp1_Ys[:,:,:,np.newaxis],K,axis=3) #t1Y_repeat.shape = (M,d,d,K)
