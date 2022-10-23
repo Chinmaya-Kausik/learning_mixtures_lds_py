@@ -31,7 +31,7 @@ def subspace_estimation_helper(data_sub_est):
     h_mij[:,:,1,:] = np.mean(h_mij_helper[:, :, 3*N-2:4*N-2, :], axis=2).transpose(1,0,2)
     
     # Shift X forward by one timestep
-    X_time_shifted = np.concatenate((X[:, 1:, :], np.zeros([M,1,d])) axis = 1)
+    X_time_shifted = np.concatenate((X[:, 1:, :], np.zeros([M,1,d])), axis = 1)
     
     # Repeat what we did for h_mij to get g_mij
     g_mij_helper = (np.broadcast_to(X_time_shifted, (d,M,T,d)).transpose(3,1,2,0)*np.broadcast_to(X, (d,M,T,d)))
