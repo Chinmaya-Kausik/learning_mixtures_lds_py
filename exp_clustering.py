@@ -52,9 +52,9 @@ for k_T in range(len(Tclusterings)):
         
         #0/1 clustering with/without dim reduction
         print("Tclustering:", Tclustering, ",  k_trial:", k_trial, ", No subspace")
-        labels_without = clustering_fast(data,Vs,Us, K, tau, no_subspace=1)
+        labels_without, S_original, S = clustering_fast(data,Vs,Us, K, tau, no_subspace=1)
         print("Tclustering:", Tclustering, "  k_trial:", k_trial, "With subspace")
-        labels_with =  clustering_fast(data,Vs,Us, K, tau, no_subspace=0)
+        labels_with, S_original, S =  clustering_fast(data,Vs,Us, K, tau, no_subspace=0)
         
         #Note: We are taking the minimum of these two quantities as the predicted labels might be flipped 
         mis_without = min(np.mean(abs(labels_without - true_labels)), np.mean(abs(1-labels_without - true_labels)))

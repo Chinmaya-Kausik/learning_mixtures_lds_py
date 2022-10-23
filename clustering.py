@@ -123,7 +123,7 @@ def clustering_fast(data, Vs, Us, K, tau, no_subspace):
     
     # Spectral clustering using Sklearn 
     clustering = SpectralClustering(n_clusters=K,affinity='precomputed').fit(S)
-    return clustering.labels_.reshape(-1,1)
+    return clustering.labels_.reshape(-1,1), S_original, S
 
     # # Manual KMeans
     # # Caution: Unclear if this code is working
