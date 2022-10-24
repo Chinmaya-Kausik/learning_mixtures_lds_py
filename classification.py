@@ -46,7 +46,7 @@ def classification(data_classification, Ahats, Whats):
             losses[k] = loss
 
         # finding index of minimum loss
-        labels[m] = np.argmax(losses)
+        labels[m] = np.argmin(losses)
 
     return labels
 
