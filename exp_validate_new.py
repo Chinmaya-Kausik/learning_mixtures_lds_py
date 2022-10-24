@@ -11,7 +11,7 @@ from utils import generate_models, compute_autocovariance, generate_mixed_lds, c
 from classification import classification
 from subspace_est import subspace_estimation
 from clustering import clustering_fast
-from model_estimation_new import model_estimation
+from model_estimation import model_estimation
 from helpers import get_clusters, model_errors
 
 # initializing parameters
@@ -28,7 +28,7 @@ Tsubspace        = 20
 Tclustering      = 20
 Tclassification  = 5
 
-Ntrials = 12
+Ntrials = 6
 block_num = 15
 
 # initializing lists for errors
@@ -97,6 +97,15 @@ for trial in range(Ntrials):
     Ahats, Whats = model_estimation(clusters)
     print('Coarse Models Estimated')
 
+    # computing initial model errors
+    A_error, W_error = model_errors(Ahats=Ahats, As=As, Whats=Whats, Ws=Ws, invperm=invperm)
+    print('Initial A Error:', A_error)
+    print('Initial W Error:', W_error)
+
+    # initializing error lists
+    errors_A = [A_error]
+    errors_W = [W_error]
+
     # classification
     tmpidx = np.linspace(5, np.log(Mclassification), block_num).T
     tmpidx = np.ceil(np.exp(tmpidx))
@@ -105,18 +114,6 @@ for trial in range(Ntrials):
     T_coarse = Tclustering * Mclustering
     T_refined = T_coarse + Tclassification * tmpidx
 
-    # computing initial model errors
-    A_error, W_error = model_errors(Ahats=Ahats, As=As, Whats=Whats, Ws=Ws, invperm=invperm)
-    print('Initial A Error:', A_error)
-    print('Initial W Error:', W_error)
-
-    # initializing error lists
-    errors_A = []
-    errors_W = []
-    
-    # coarse errors
-    errors_A.append(A_error)
-    errors_W.append(W_error)
     
     # going through all block iterations
     for j in range(block_num):
@@ -131,12 +128,21 @@ for trial in range(Ntrials):
         newlabels = newlabels + 1
 
         new_clusters = get_clusters(data=newdata, labels=newlabels.squeeze(), K=K)
-
+        #print(len(new_clusters[0]), len(new_clusters[1]), len(new_clusters[2]), print(len(new_clusters[3])))
+        
+        # adding new clusters to data
+        for k in range(K):
+            tmp = new_clusters[k]
+            clusters[k] = clusters[k] + tmp
+            
         # refining models
         refined_Ahats, refined_Whats = model_estimation(clusters)
         refined_err_Ahats, refined_err_Whats = model_errors(Ahats=refined_Ahats, As=As,
                                                             Whats=refined_Whats, Ws=Ws, invperm=invperm)
-        print(refined_err_Ahats)
+
+        print("Refined A Error: ", refined_err_Ahats)
+        print("Refined W Error: ", refined_err_Whats)
+
         # appending errors
         errors_A.append(refined_err_Ahats)
         errors_W.append(refined_err_Whats)
