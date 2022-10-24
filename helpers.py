@@ -25,7 +25,7 @@ def get_clusters(data, labels, K):
     clustered_data = []
     
     # clustering for each class
-    for k in range(K):
+    for k in range(1, K+1):
        class_label = []
        
        # looping through each labels
@@ -34,12 +34,11 @@ def get_clusters(data, labels, K):
                class_label.append(data[i])
        
        # turning into an array before adding to list
-       class_label = np.asarray(class_label)
-       clustered_data.append(class_label)        
+       clustered_data.append(class_label)
     
     return clustered_data
 
-def model_errors(Ahats, As, Whats, Ws):
+def model_errors(Ahats, As, Whats, Ws, invperm):
     """
     Function to obtain errors for estimated A and W.
     
@@ -61,6 +60,7 @@ def model_errors(Ahats, As, Whats, Ws):
     W_errors = []
     
     for k in range(K):
+        invk = int(invperm[k])
         A_error = np.linalg.norm(Ahats[k] - As[k], 'fro')
         A_errors.append(A_error)
     

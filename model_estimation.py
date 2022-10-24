@@ -1,33 +1,62 @@
-#input:
-    #clusters:
-        #for k = 1,...,K
-        #clusters[k] is an array of matrices X_m each of dimension d x T
-        #where d = number of features, T = length of trajectory
-#output:
-    #Ahats
-        #for k = 1,...,K
-        #Ahats[k] is matrix of dxd 
-    #Whats
-        #for k = 1,...,K
-        #Whats[k] is matrix of dxd 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Oct 24 01:23:25 2022
+
+@author: soominkwon
+"""
+
+import numpy as np
+
 def model_estimation(clusters):
+    """
+    Function for least squares and covariance estimation.
+    
+    Parameters:
+        clusters:   List of lists of size m of data matrices of size (d, T)
+            
+    Returns:
+        Ahats:      List of estimated A models
+        Whats:      List of estimated W covariance matrices
+    """
+    # initializing
     K = len(clusters)
+    d = clusters[0][0].shape[0]
+
     Ahats = []
     Whats = []
-    d = len(clusters[0][0])
-    T = len(clusters[0][0][0])
     
+    # estimating matrices for each class
     for k in range(K):
-        tp = clusters[k][:,:,:T-1]
-        tpp = clusters[k][:,:,1:]
-        xxt = np.sum(np.matmul(tp, np.transpose(tp,(0,2,1))), axis=0)
-        xpxt = np.sum(np.matmul(tpp, np.transpose(tp,(0,2,1))), axis=0)
-        Ahat = np.matmul(xpxt, np.linalg.inv(xxt))
+        # computing Ahat
+        xxt = np.zeros((d, d))
+        xpxt = np.zeros((d, d))
+
+        # computing for each data matrix in each cluster
+        for m in range(len(clusters[k])):
+            T = clusters[k][m].shape[1]
+            tmp = clusters[k][m][:, :T-1]
+            tmpp = clusters[k][m][:, 1:]
+            xxt = xxt + tmp @ tmp.T
+            xpxt = xpxt + tmpp @ tmp.T
+
+        Ahat = xpxt @ np.linalg.inv(xxt)
         Ahats.append(Ahat)
-        
-        tmpT = len(clusters[k])*T
-        whats = tpp - np.matmul(Ahat, tp)
-        What = 1/tmpT*np.sum(np.matmul(whats, np.transpose(whats, (0,2,1))), axis=0)
+
+        # computing What
+        tmpT = 0
+        What = np.zeros((d, d))
+
+        # computing for each data matrix in each cluster
+        for m in range(len(clusters[k])):
+            T = clusters[k][m].shape[1]
+            tmp = clusters[k][m][:, :T-1]
+            tmpp = clusters[k][m][:, 1:]
+            whats = tmpp - Ahat @ tmp
+            What = What + whats @ whats.T
+            tmpT = tmpT + tmp.shape[1]
+
+        What = What / tmpT
         Whats.append(What)
 
-    return Ahats,Whats
+    return Ahats, Whats

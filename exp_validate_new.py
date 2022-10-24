@@ -11,17 +11,17 @@ from utils import generate_models, compute_autocovariance, generate_mixed_lds, c
 from classification import classification
 from subspace_est import subspace_estimation
 from clustering import clustering_fast
-from model_estimation import model_estimation
+from model_estimation_new import model_estimation
 from helpers import get_clusters, model_errors
 
 # initializing parameters
-d   = 80
+d   = 30
 K   = 4
 rho = 0.5
 
 Msubspace        = 30  * d
 Mclustering      = 10 * d
-Mclassification  = 5000 * d
+Mclassification  = 50 * d
 M = Msubspace + Mclustering + Mclassification
 
 Tsubspace        = 20
@@ -36,6 +36,7 @@ all_trials_A = np.zeros((Ntrials, block_num+1))
 all_trials_W = np.zeros((Ntrials, block_num+1))
 
 for trial in range(Ntrials):
+    print('Trial Number:', trial)
     # generating labels and lengths of trajectories
     true_labels = np.random.randint(1, K, (M, 1))
 
@@ -70,9 +71,28 @@ for trial in range(Ntrials):
                                         no_subspace=0)
     print('Coarse Labels Clustered')
 
+    labels_clustering = labels_clustering + 1
+
     # getting the data corresponding to clusters
     clusters = get_clusters(data=data_clustering, labels=labels_clustering.squeeze(), K=K)
-    print(clusters[0].shape, clusters[1].shape, clusters[2].shape, clusters[3].shape)
+
+    # determine permutation
+    subtl = true_labels[Msubspace:(Msubspace+Mclustering)]
+    perm = np.zeros((K, 1)) # true label -> estimated label
+    invperm = np.zeros((K, 1)) # estimated label -> true label
+    for k in range(1, K+1):
+        idx = (subtl == k)*1
+        tmp = []
+        for val in range(len(idx)):
+            if idx[val] == 1:
+                tmp.append(labels_clustering[val])
+        tmpint = 0
+        if tmp:
+            tmpint += round(np.median(tmp))
+        perm[k-1] = tmpint
+        invperm[tmpint-1] = k-1
+
+
     # coarse model estimation
     Ahats, Whats = model_estimation(clusters)
     print('Coarse Models Estimated')
@@ -86,7 +106,7 @@ for trial in range(Ntrials):
     T_refined = T_coarse + Tclassification * tmpidx
 
     # computing initial model errors
-    A_error, W_error = model_errors(Ahats=Ahats, As=As, Whats=Whats, Ws=Ws)
+    A_error, W_error = model_errors(Ahats=Ahats, As=As, Whats=Whats, Ws=Ws, invperm=invperm)
     print('Initial A Error:', A_error)
     print('Initial W Error:', W_error)
 
@@ -108,14 +128,15 @@ for trial in range(Ntrials):
 
         # coarse model classification
         newlabels = classification(data_classification=newdata, Ahats=Ahats, Whats=Whats)
+        newlabels = newlabels + 1
 
-        clusters = get_clusters(data=newdata, labels=newlabels.squeeze(), K=K)
+        new_clusters = get_clusters(data=newdata, labels=newlabels.squeeze(), K=K)
 
         # refining models
         refined_Ahats, refined_Whats = model_estimation(clusters)
         refined_err_Ahats, refined_err_Whats = model_errors(Ahats=refined_Ahats, As=As,
-                                                            Whats=refined_Whats, Ws=Ws)
-        
+                                                            Whats=refined_Whats, Ws=Ws, invperm=invperm)
+        print(refined_err_Ahats)
         # appending errors
         errors_A.append(refined_err_Ahats)
         errors_W.append(refined_err_Whats)
