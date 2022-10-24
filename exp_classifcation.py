@@ -84,7 +84,7 @@ for k_classification, Tclassification in enumerate(Tclassifications):
         for k in range(K):
             true_labels_perm[true_labels_classification == k] = label_perm[k] 
         
-        misclassification = np.mean(np.abs(true_labels_perm - labels_classification))
+        misclassification = np.mean(np.abs(true_labels_perm.squeeze() - labels_classification.squeeze()))
         errors[k_classification,k_trial] = misclassification
 
 mean_error = np.mean(errors,axis=1)
