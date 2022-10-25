@@ -7,6 +7,8 @@ Created on Fri Oct 21 19:12:03 2022
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from utils import generate_models, compute_autocovariance, generate_mixed_lds, compute_separation
 from classification import classification
 from subspace_est import subspace_estimation
@@ -38,7 +40,7 @@ all_trials_W = np.zeros((Ntrials, block_num+1))
 for trial in range(Ntrials):
     print('Trial Number:', trial)
     # generating labels and lengths of trajectories
-    true_labels = np.random.randint(1, K, (M, 1))
+    true_labels = np.random.randint(0, K, (M, 1))
 
     Ts = np.concatenate([np.ones((Msubspace, 1))*Tsubspace, np.ones((Mclustering,1))*Tclustering,
                          np.ones((Mclassification, 1))*Tclassification], axis=0)
@@ -71,7 +73,7 @@ for trial in range(Ntrials):
                                         no_subspace=0)
     print('Coarse Labels Clustered')
 
-    labels_clustering = labels_clustering + 1
+    print(labels_clustering)
 
     # getting the data corresponding to clusters
     clusters = get_clusters(data=data_clustering, labels=labels_clustering.squeeze(), K=K)
@@ -80,7 +82,7 @@ for trial in range(Ntrials):
     subtl = true_labels[Msubspace:(Msubspace+Mclustering)]
     perm = np.zeros((K, 1)) # true label -> estimated label
     invperm = np.zeros((K, 1)) # estimated label -> true label
-    for k in range(1, K+1):
+    for k in range(K):
         idx = (subtl == k)*1
         tmp = []
         for val in range(len(idx)):
@@ -89,8 +91,8 @@ for trial in range(Ntrials):
         tmpint = 0
         if tmp:
             tmpint += round(np.median(tmp))
-        perm[k-1] = tmpint
-        invperm[tmpint-1] = k-1
+        perm[k] = tmpint
+        invperm[tmpint] = k
 
 
     # coarse model estimation
@@ -125,7 +127,7 @@ for trial in range(Ntrials):
 
         # coarse model classification
         newlabels = classification(data_classification=newdata, Ahats=Ahats, Whats=Whats)
-        newlabels = newlabels + 1
+        newlabels = newlabels
 
         new_clusters = get_clusters(data=newdata, labels=newlabels.squeeze(), K=K)
         #print(len(new_clusters[0]), len(new_clusters[1]), len(new_clusters[2]), print(len(new_clusters[3])))
@@ -151,13 +153,21 @@ for trial in range(Ntrials):
     all_trials_A[trial, :] = np.asarray(errors_A)
     all_trials_W[trial, :] = np.asarray(errors_W)
 
+
+A_errors_mean = np.mean(all_trials_A, axis=0)
+W_errors_mean = np.mean(all_trials_W, axis=0)
+scales = np.sqrt(K*d / T_refined)
+
+plt.rc('font', family='serif')
+plt.plot(T_refined, A_errors_mean.T, 'blue',marker='o')
+plt.plot(T_refined, W_errors_mean.T, 'orange', marker='*')
+plt.plot(T_refined, scales, 'black', linestyle='--')
+plt.xscale("log")
+plt.yscale("log")
+plt.grid(True, 'both')
+plt.legend(['A', 'W', '$\sqrt{Kd/T}$'])
+plt.show()
+
 np.savez('A_errors.npz', all_trials_A)
 np.savez('W_errors.npz', all_trials_W)
 np.savez('T_refined.npz', T_refined)
-
-    
-    
-
-    
-    
-    
