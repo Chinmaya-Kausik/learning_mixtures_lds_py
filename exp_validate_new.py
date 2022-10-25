@@ -90,10 +90,11 @@ for trial in range(Ntrials):
             if idx[val] == 1:
                 tmp.append(labels_clustering[val])
         tmpint = 0
-        if(tmp):
+        if(tmp and (round(np.median(tmp)) not in visited)):
             tmpint = round(np.median(tmp))
             visited.append(tmpint)
         else:
+            print("Msub = ", Msubspace)
             raise NotImplementedError("Bad data")
         perm[k] = tmpint
         invperm[tmpint] = k
