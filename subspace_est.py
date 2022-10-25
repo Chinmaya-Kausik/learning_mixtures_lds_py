@@ -42,11 +42,11 @@ def subspace_estimation_helper(data_sub_est):
     
     # Vectorizes the sum for H_i and G_i
     H_i = ((h_mij[:,:,0,:]).transpose(1,2,0))@(h_mij[:,:,1,:].transpose(1,0,2))/M
-    G_i = ((h_mij[:,:,0,:]).transpose(1,2,0))@(h_mij[:,:,1,:].transpose(1,0,2))/M
+    G_i = ((g_mij[:,:,0,:]).transpose(1,2,0))@(g_mij[:,:,1,:].transpose(1,0,2))/M
 
     # Add transpose
-    H_i = (H_i + H_i.transpose(0,2,1))/2
-    G_i = (G_i+ G_i.transpose(0,2,1))/2
+    H_i = (H_i + H_i.transpose(0,2,1))
+    G_i = (G_i+ G_i.transpose(0,2,1))
     
     return H_i, G_i
     
@@ -74,7 +74,10 @@ def subspace_estimation(data_sub_est, K):
     # Get eigenvectors
     for i in range(d):
         eigval, V_i[i, :, :] = linalg.eigh(H_i[i, :, :], subset_by_index= [d-K,d-1])
+        print(eigval)
         eigval, U_i[i,:,:] = linalg.eigh(G_i[i,:,:], subset_by_index=[d-K,d-1])
+        print(eigval)
+
     
     return V_i, U_i
 
