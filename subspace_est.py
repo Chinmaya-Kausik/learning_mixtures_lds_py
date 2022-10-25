@@ -4,9 +4,10 @@ from scipy import linalg
 def subspace_estimation_helper(data_sub_est):
 
     """
-    Input: data_sub_est as a (M,T,d) tensor
+    Input: data_sub_est as a (M,d,T+1) tensor
     where M is the number of trajectories
     T is the trajectory length
+    Tp1 = T
     d is the dimension of the data
 
     Output: d (d times d) matrices H_i and G_i whose top K eigenspace we want
@@ -16,15 +17,15 @@ def subspace_estimation_helper(data_sub_est):
     # Set up data matrix X and dimensions
     X = np.array(data_sub_est)
     X = X.transpose(0,2,1)
-    M, T, d = X.shape
-    N = int(T/4)
+    M, Tp1, d = X.shape
+    N = int((Tp1-1)/4)
     
     # Initialize h_mij and g_mij
     h_mij = np.zeros([M,d,2,d])
     g_mij = np.zeros([M,d,2,d])
     
     # Make a helper for h_mij that vectorizes the multiplication involved
-    h_mij_helper = (np.broadcast_to(X, (d,M,T,d)).transpose(3,1,2,0)*np.broadcast_to(X, (d,M,T,d)))
+    h_mij_helper = (np.broadcast_to(X, (d,M,Tp1,d)).transpose(3,1,2,0)*np.broadcast_to(X, (d,M,Tp1,d)))
     
     # Take the means of the helper along the time axis to get h_mij
     h_mij[:,:,0,:] = np.mean(h_mij_helper[:, :, N-2:2*N-2, :], axis=2).transpose(1,0,2)
@@ -34,7 +35,7 @@ def subspace_estimation_helper(data_sub_est):
     X_time_shifted = np.concatenate((X[:, 1:, :], np.zeros([M,1,d])), axis = 1)
     
     # Repeat what we did for h_mij to get g_mij
-    g_mij_helper = (np.broadcast_to(X_time_shifted, (d,M,T,d)).transpose(3,1,2,0)*np.broadcast_to(X, (d,M,T,d)))
+    g_mij_helper = (np.broadcast_to(X_time_shifted, (d,M,Tp1,d)).transpose(3,1,2,0)*np.broadcast_to(X, (d,M,Tp1,d)))
     
     g_mij[:,:,0,:] = np.mean(g_mij_helper[:, :, N-2:2*N-2, :], axis=2).transpose(1,0,2)
     g_mij[:,:,1,:] = np.mean(g_mij_helper[:, :, 3*N-2:4*N-2, :], axis=2).transpose(1,0,2)
@@ -47,9 +48,10 @@ def subspace_estimation_helper(data_sub_est):
     
 def subspace_estimation(data_sub_est, K):
     """
-    Input: data_sub_est as a (M,T,d) tensor
+    Input: data_sub_est as a (M,d,T+1) tensor
     where M is the number of trajectories
     T is the trajectory length
+    Tp1 = T+1
     d is the dimension of the data
 
     Output: d (d times K) matrices V_i and U_i which are orthogonal projectors to the desired subspaces
@@ -59,7 +61,7 @@ def subspace_estimation(data_sub_est, K):
     H_i, G_i = subspace_estimation_helper(data_sub_est)
 
     X = np.array(data_sub_est).transpose(0,2,1)
-    M,T,d = X.shape
+    M,Tp1,d = X.shape
     
     # Initialize V_i and U_i
     V_i = np.zeros([d,d,K])

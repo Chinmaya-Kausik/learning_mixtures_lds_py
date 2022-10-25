@@ -82,6 +82,7 @@ for trial in range(Ntrials):
     subtl = true_labels[Msubspace:(Msubspace+Mclustering)]
     perm = np.zeros((K, 1)) # true label -> estimated label
     invperm = np.zeros((K, 1)) # estimated label -> true label
+    visited = []
     for k in range(K):
         idx = (subtl == k)*1
         tmp = []
@@ -89,8 +90,11 @@ for trial in range(Ntrials):
             if idx[val] == 1:
                 tmp.append(labels_clustering[val])
         tmpint = 0
-        if tmp:
-            tmpint += round(np.median(tmp))
+        if(tmp):
+            tmpint = round(np.median(tmp))
+            visited.append(tmpint)
+        else:
+            raise NotImplementedError("Bad data")
         perm[k] = tmpint
         invperm[tmpint] = k
 
