@@ -7,7 +7,7 @@ def subspace_estimation_helper(data_sub_est):
     Input: data_sub_est as a (M,d,T+1) tensor
     where M is the number of trajectories
     T is the trajectory length
-    Tp1 = T
+    Tp1 = T+1
     d is the dimension of the data
 
     Output: d (d times d) matrices H_i and G_i whose top K eigenspace we want
@@ -70,7 +70,7 @@ def subspace_estimation(data_sub_est, K):
     # Get eigenvectors
     for i in range(d):
         eigval, V_i[i, :, :] = linalg.eigh(H_i[i, :, :], subset_by_index= [d-K,d-1])
-        eigval, U_i[i,:,:] = linalg.eigh(H_i[i,:,:], subset_by_index=[d-K,d-1])
+        eigval, U_i[i,:,:] = linalg.eigh(G_i[i,:,:], subset_by_index=[d-K,d-1])
     
     return V_i, U_i
 
