@@ -25,7 +25,7 @@ def get_clusters(data, labels, K):
     clustered_data = []
     
     # clustering for each class
-    for k in range(1, K+1):
+    for k in range(K):
        class_label = []
        
        # looping through each labels
@@ -61,10 +61,10 @@ def model_errors(Ahats, As, Whats, Ws, invperm):
     
     for k in range(K):
         invk = int(invperm[k])
-        A_error = np.linalg.norm(Ahats[k] - As[invk], 2)
+        A_error = np.linalg.norm(Ahats[k] - As[k], 2)
         A_errors.append(A_error)
     
-        W_error = np.linalg.norm(Whats[k] - Ws[invk], 2) / np.linalg.norm(Ws[invk], 2)
+        W_error = np.linalg.norm(Whats[k] - Ws[k], 2) / np.linalg.norm(Ws[k], 2)
         W_errors.append(W_error)
     
     max_A_error = max(A_errors)
