@@ -43,6 +43,10 @@ def subspace_estimation_helper(data_sub_est):
     # Vectorizes the sum for H_i and G_i
     H_i = ((h_mij[:,:,0,:]).transpose(1,2,0))@(h_mij[:,:,1,:].transpose(1,0,2))/M
     G_i = ((h_mij[:,:,0,:]).transpose(1,2,0))@(h_mij[:,:,1,:].transpose(1,0,2))/M
+
+    # Add transpose
+    H_i = (H_i + H_i.transpose(0,2,1))/2
+    G_i = (G_i+ G_i.transpose(0,2,1))/2
     
     return H_i, G_i
     
