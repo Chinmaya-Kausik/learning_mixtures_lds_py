@@ -33,7 +33,7 @@ def model_estimation(listOfClusters):
         What = np.zeros((d,d))
         for clusters in listOfClusters:
             T = len(clusters[0][0][0])
-            tmpT += len(clusters[k])*T
+            tmpT += len(clusters[k])*(T-1)
             tp = clusters[k][:,:,:T-1]
             tpp = clusters[k][:,:,1:]
             whats = tpp - np.matmul(Ahat, tp)
