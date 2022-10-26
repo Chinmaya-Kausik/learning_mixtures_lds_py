@@ -2,16 +2,11 @@ from utils import compute_autocovariance, compute_separation, generate_mixed_lds
 from subspace_est import subspace_estimation
 import numpy as np
 from scipy import linalg
-from sklearn.cluster import SpectralClustering
 import matplotlib.pyplot as plt
 from clustering import clustering_fast
 
 # Initial setup 
-<<<<<<< HEAD
 Ntrial = 30
-=======
-Ntrial = 10
->>>>>>> 2e9b96b588b27ee97d246eb6282d2a31678d6021
 d = 40
 K =  2
 rho = 0.5
