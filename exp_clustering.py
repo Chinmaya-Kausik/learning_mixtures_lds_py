@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from clustering import clustering_fast
 
 # Initial setup 
-Ntrial = 1
+Ntrial = 30
 d = 40
 K =  2
 rho = 0.5
@@ -57,8 +57,8 @@ for k_T in range(len(Tclusterings)):
         labels_with, S_original, S =  clustering_fast(data,Vs,Us, K, tau, no_subspace=0)
         
         #Note: We are taking the minimum of these two quantities as the predicted labels might be flipped 
-        mis_without = min(np.mean(abs(labels_without - true_labels)), np.mean(abs(1-labels_without - true_labels)))
-        mis_with = min(np.mean(abs(labels_with - true_labels)), np.mean(abs(1-labels_with - true_labels)))
+        mis_without = min(np.mean(abs(labels_without.squeeze() - true_labels.squeeze())), np.mean(abs(1-labels_without.squeeze() - true_labels.squeeze())))
+        mis_with = min(np.mean(abs(labels_with.squeeze() - true_labels.squeeze())), np.mean(abs(1-labels_with.squeeze() - true_labels.squeeze())))
         
         error_list_without[k_T,k_trial] = mis_without 
         error_list_with[k_T,k_trial] = mis_with
