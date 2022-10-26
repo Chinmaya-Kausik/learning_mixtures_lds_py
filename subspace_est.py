@@ -73,8 +73,8 @@ def subspace_estimation(data_sub_est, K):
     
     # Get eigenvectors
     for i in range(d):
-        eigval, V_i[i, :, :] = linalg.eigh(H_i[i, :, :], subset_by_index= [d-K,d-1])
-        eigval, U_i[i,:,:] = linalg.eigh(G_i[i,:,:], subset_by_index=[d-K,d-1])
+        V_i[i, :, :] = linalg.svd(H_i[i, :, :])[0][:,:K]
+        U_i[i,:,:] = linalg.svd(G_i[i,:,:])[0][:,:K]
 
     
     return V_i, U_i
