@@ -75,14 +75,12 @@ plt.close()
 
 # Color map of the original matrix
 Vs, Us = subspace_estimation(combined_data,K)
-tau = 110
+tau = 140
 labels, S_original, S = clustering_fast(combined_data, Vs, Us, K, tau, 0)
 fig, ax = plt.subplots()
 ax.set(xlabel = "Trajectories", ylabel = "Trajectories", title = "Color map of the original matrix")
 cax = ax.matshow(S_original, cmap = "gray")
 ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
-fig.colorbar(cax, ax=ax)
-fig.savefig("gray_color_map.png")
 plt.close()
 
 # Histogram of computed distances 
@@ -101,6 +99,8 @@ cax = ax.matshow(S, cmap = "gray")
 ax.tick_params(top=False, labeltop=False, bottom=True, labelbottom=True)
 fig.colorbar(cax, ax=ax)
 fig.savefig("gray_color_map_true.png")
+fig.colorbar(cax, ax=ax)
+fig.savefig("gray_color_map.png")
 plt.close()
 
 # Misclassification rate

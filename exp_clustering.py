@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from clustering import clustering_fast
 
 # Initial setup 
-Ntrial = 1
+Ntrial = 10
 d = 40
 K =  2
 rho = 0.5
