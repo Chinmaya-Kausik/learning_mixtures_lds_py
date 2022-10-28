@@ -34,7 +34,7 @@ def get_clusters(data, labels, K):
                class_label.append(data[i])
        
        # turning into an array before adding to list
-       clustered_data.append(class_label)
+       clustered_data.append(np.array(class_label))
     
     return clustered_data
 
