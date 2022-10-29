@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Oct 23 17:02:50 2022
-
-@author: soominkwon
-"""
-   
 import numpy as np
 
 def get_clusters(data, labels, K):
@@ -25,7 +17,7 @@ def get_clusters(data, labels, K):
     clustered_data = []
     
     # clustering for each class
-   for k in range(K):
+    for k in range(K):
        class_label = []
        
        # looping through each labels
@@ -34,9 +26,7 @@ def get_clusters(data, labels, K):
                class_label.append(data[i])
        
        # turning into an array before adding to list
-      clustered_data.append(class_label)
-      #use with model_estimation_pseudoVectorized.py:
-      #clustered_data.append(np.array(class_label))
+       clustered_data.append(class_label)
     
     return clustered_data
 
@@ -63,10 +53,10 @@ def model_errors(Ahats, As, Whats, Ws, invperm):
     
     for k in range(K):
         invk = int(invperm[k])
-        A_error = np.linalg.norm(Ahats[k] - As[k], 2)
+        A_error = np.linalg.norm(Ahats[k] - As[invk], 2)
         A_errors.append(A_error)
     
-        W_error = np.linalg.norm(Whats[k] - Ws[k], 2) / np.linalg.norm(Ws[k], 2)
+        W_error = np.linalg.norm(Whats[k] - Ws[invk], 2) / np.linalg.norm(Ws[invk], 2)
         W_errors.append(W_error)
     
     max_A_error = max(A_errors)
