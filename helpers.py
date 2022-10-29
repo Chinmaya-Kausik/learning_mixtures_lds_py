@@ -25,7 +25,7 @@ def get_clusters(data, labels, K):
     clustered_data = []
     
     # clustering for each class
-    for k in range(K):
+   for k in range(K):
        class_label = []
        
        # looping through each labels
@@ -34,7 +34,9 @@ def get_clusters(data, labels, K):
                class_label.append(data[i])
        
        # turning into an array before adding to list
-       clustered_data.append(np.array(class_label))
+      clustered_data.append(class_label)
+      #use with model_estimation_pseudoVectorized.py:
+      #clustered_data.append(np.array(class_label))
     
     return clustered_data
 
