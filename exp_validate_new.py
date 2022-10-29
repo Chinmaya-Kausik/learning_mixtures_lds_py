@@ -8,29 +8,32 @@ Created on Fri Oct 21 19:12:03 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
-
 from utils import generate_models, compute_autocovariance, generate_mixed_lds, compute_separation
 from classification import classification
 from subspace_est import subspace_estimation
 from clustering import clustering_fast
 from model_estimation import model_estimation
 from helpers import get_clusters, model_errors
+import time
+
+# recording time
+start_time = time.time()
 
 # initializing parameters
-d   = 30
+d   = 80
 K   = 4
 rho = 0.5
 
-Msubspace        = 30  * d
+Msubspace        = 30 * d
 Mclustering      = 10 * d
-Mclassification  = 50 * d
+Mclassification  = 5000 * d
 M = Msubspace + Mclustering + Mclassification
 
 Tsubspace        = 20
 Tclustering      = 20
 Tclassification  = 5
 
-Ntrials = 6
+Ntrials = 12
 block_num = 15
 
 # initializing lists for errors
@@ -51,8 +54,8 @@ for trial in range(Ntrials):
     # squaring Ws
     Ws = []
     for k in range(K):
-        Ws.append(Whalfs[k]**2)
-    
+        Ws.append(Whalfs[k] @ Whalfs[k])
+
     # generating synthetic data
     Gammas, Ys = compute_autocovariance(As=As, Whalfs=Whalfs)
     delta_gy = compute_separation(Gammas=Gammas, Ys=Ys)
@@ -61,7 +64,7 @@ for trial in range(Ntrials):
     data_subspace = data[:Msubspace]
     data_clustering = data[Msubspace:(Msubspace+Mclustering)]
     data_classification = data[(Msubspace+Mclustering):]
-
+    #data_classification = data[(M-Mclassification+1):]
     print('Synthetic Data Generated')
     
     # coarse subspace estimation
@@ -73,16 +76,13 @@ for trial in range(Ntrials):
                                         no_subspace=0)
     print('Coarse Labels Clustered')
 
-    print(labels_clustering)
-
     # getting the data corresponding to clusters
     clusters = get_clusters(data=data_clustering, labels=labels_clustering.squeeze(), K=K)
 
     # determine permutation
     subtl = true_labels[Msubspace:(Msubspace+Mclustering)]
-    perm = np.zeros((K, 1)) # true label -> estimated label
-    invperm = np.zeros((K, 1)) # estimated label -> true label
-    visited = []
+    perm = np.zeros((K, )) # true label -> estimated label
+    invperm = np.zeros((K, )) # estimated label -> true label
     for k in range(K):
         idx = (subtl == k)*1
         tmp = []
@@ -90,15 +90,12 @@ for trial in range(Ntrials):
             if idx[val] == 1:
                 tmp.append(labels_clustering[val])
         tmpint = 0
-        if(tmp and (round(np.median(tmp)) not in visited)):
-            tmpint = round(np.median(tmp))
-            visited.append(tmpint)
+        if tmp:
+            tmpint += round(np.median(tmp))
         else:
-            print("Msub = ", Msubspace)
-            raise NotImplementedError("Bad data")
+            tmpint = -1
         perm[k] = tmpint
         invperm[tmpint] = k
-
 
     # coarse model estimation
     Ahats, Whats = model_estimation(clusters)
@@ -132,11 +129,9 @@ for trial in range(Ntrials):
 
         # coarse model classification
         newlabels = classification(data_classification=newdata, Ahats=Ahats, Whats=Whats)
-        newlabels = newlabels
 
-        new_clusters = get_clusters(data=newdata, labels=newlabels.squeeze(), K=K)
-        #print(len(new_clusters[0]), len(new_clusters[1]), len(new_clusters[2]), print(len(new_clusters[3])))
-        
+        new_clusters = get_clusters(data=newdata, labels=newlabels, K=K)
+
         # adding new clusters to data
         for k in range(K):
             tmp = new_clusters[k]
@@ -163,16 +158,18 @@ A_errors_mean = np.mean(all_trials_A, axis=0)
 W_errors_mean = np.mean(all_trials_W, axis=0)
 scales = np.sqrt(K*d / T_refined)
 
-plt.rc('font', family='serif')
+print("--- %s seconds ---" % (time.time() - start_time))
+
+
+# plotting
 plt.plot(T_refined, A_errors_mean.T, 'blue',marker='o')
 plt.plot(T_refined, W_errors_mean.T, 'orange', marker='*')
 plt.plot(T_refined, scales, 'black', linestyle='--')
+plt.xlabel("Sample Size $T$")
+plt.ylabel("Error")
 plt.xscale("log")
 plt.yscale("log")
 plt.grid(True, 'both')
 plt.legend(['A', 'W', '$\sqrt{Kd/T}$'])
+plt.savefig("exp_validate_plot.pdf", bbox_inches="tight")
 plt.show()
-
-np.savez('A_errors.npz', all_trials_A)
-np.savez('W_errors.npz', all_trials_W)
-np.savez('T_refined.npz', T_refined)
