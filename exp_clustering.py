@@ -12,6 +12,7 @@ K =  2
 rho = 0.5
 delta_A = 0.12
 Mclustering = 5*d
+Msubspace = 5*d
 Tclusterings = np.array([10*i for i in range(1,7)])
 
 
@@ -46,8 +47,14 @@ for k_T in range(len(Tclusterings)):
         Ts = np.ones([Mclustering,1])*Tclustering
         data = generate_mixed_lds(As, Whalfs,true_labels,Ts)
         
-        #Subspace estimation
-        Vs, Us = subspace_estimation(data,K)
+        #Subspace estimation with independent data
+        true_labels_sub = np.random.randint(K,size=[Msubspace,1])
+        Ts_sub = np.ones([Msubspace,1])*Tclustering
+        data_sub = generate_mixed_lds(As, Whalfs,true_labels_sub,Ts_sub)
+        Vs, Us = subspace_estimation(data_sub,K)
+        
+        # #Subspace estimation
+        # Vs, Us = subspace_estimation(data,K)
         
         #0/1 clustering with/without dim reduction
         print("Tclustering:", Tclustering, ",  k_trial:", k_trial, ", No subspace")
