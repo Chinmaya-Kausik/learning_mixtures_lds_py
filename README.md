@@ -1,6 +1,6 @@
 # Learning Mixtures of Linear Dynamical Systems (Python)
 
-* This repository implements Chen and Poor's algorithm from [this ICML paper](https://arxiv.org/abs/2201.11211) in Python. 
+* This repository implements Chen and Poor's algorithm from [this ICML 2022 paper](https://arxiv.org/abs/2201.11211) in Python. 
 * All relevant code is in the "code" folder. 
 * The main 4 subroutines are implemented in subspace_est.py, clustering.py, classification.py and model_estimation_vectorized.py respectively. There are unvectorized versions of the model estimation subroutine too, which take less memory but more time.
 
